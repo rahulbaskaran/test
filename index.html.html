@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Subject Encoder Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0A0A0F;
+    --surface:   #12121A;
+    --surface2:  #1A1A26;
+    --border:    #1E1E30;
+    --accent:    #6C63FF;
+    --accent2:   #00D9A3;
+    --accent3:   #FF6B6B;
+    --text:      #E8E8F0;
+    --muted:     #6B6B8A;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Space Grotesk', sans-serif;
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── LAYOUT ─────────────────────────────────────── */
+  .app {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ──────────────────────────────────────── */
+  header {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+  }
+
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), #9C94FF);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+
+  header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  header .subtitle {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: auto;
+    font-family: var(--mono);
+  }
+
+  /* ── MAIN TWO-PANEL ──────────────────────────────── */
+  .workspace {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    overflow: hidden;
+  }
+
+  /* ── LEFT PANEL ──────────────────────────────────── */
+  .left-panel {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+  }
+
+  .panel-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .input-area {
+    padding: 20px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .input-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 14px 16px;
+    resize: none;
+    min-height: 120px;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+  }
+
+  textarea::placeholder { color: var(--muted); font-weight: 400; }
+
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.12);
+  }
+
+  /* char counter */
+  .char-count {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: -8px;
+  }
+
+  /* ── CASE TOGGLES ─────────────────────────────────── */
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .case-toggles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .case-toggle {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .case-toggle:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .case-toggle.active {
+    background: rgba(108,99,255,0.12);
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .case-toggle .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .case-toggle.active .dot { background: var(--accent); }
+
+  /* ── FORMAT TOGGLES ─────────────────────────────── */
+  .format-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .format-toggle {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .format-toggle:hover {
+    border-color: var(--accent2);
+    color: var(--text);
+  }
+
+  .format-toggle.active {
+    background: rgba(0,217,163,0.08);
+    border-color: var(--accent2);
+    color: var(--text);
+  }
+
+  .format-toggle .fdot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .format-toggle.active .fdot { background: var(--accent2); }
+
+  .format-toggle .badge {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--border);
+    color: var(--muted);
+  }
+
+  .format-toggle.active .badge {
+    background: rgba(0,217,163,0.15);
+    color: var(--accent2);
+  }
+
+  /* ── COPY ALL BUTTON ─────────────────────────────── */
+  .actions {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #9C94FF);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 13px 20px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.2px;
+  }
+
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    width: 100%;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--accent3); color: var(--accent3); }
+
+  /* ── RIGHT PANEL ─────────────────────────────────── */
+  .right-panel {
+    overflow-y: auto;
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .right-panel::-webkit-scrollbar { width: 6px; }
+  .right-panel::-webkit-scrollbar-track { background: transparent; }
+  .right-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* empty state */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--muted);
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    opacity: 0.3;
+  }
+
+  .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--muted); }
+  .empty-state p { font-size: 13px; max-width: 260px; }
+
+  /* ── CASE BLOCK ──────────────────────────────────── */
+  .case-block {
+    margin-bottom: 24px;
+    animation: fadeUp 0.25s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .case-block-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .case-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .case-block-header .preview-text {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+    opacity: 0.7;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── ENCODE CARD ─────────────────────────────────── */
+  .encode-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+    position: relative;
+  }
+
+  .encode-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    opacity: 0.7;
+    border-radius: 0;
+  }
+
+  .encode-card.plain::before { background: var(--muted); opacity: 0.4; }
+  .encode-card.b64::before   { background: #FF9F43; }
+  .encode-card.qp::before    { background: #6C63FF; }
+  .encode-card.iso::before   { background: #FF6B6B; }
+  .encode-card.gb::before    { background: #F7D794; }
+  .encode-card.koi::before   { background: var(--accent2); }
+
+  .encode-card:hover { border-color: rgba(108,99,255,0.4); }
+
+  .card-top {
+    padding: 10px 14px 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .enc-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+  }
+
+  .enc-badge.plain { background: rgba(107,107,138,0.15); color: var(--muted); }
+  .enc-badge.b64   { background: rgba(255,159,67,0.12); color: #FF9F43; }
+  .enc-badge.qp    { background: rgba(108,99,255,0.12); color: #9C94FF; }
+  .enc-badge.iso   { background: rgba(255,107,107,0.12); color: #FF6B6B; }
+  .enc-badge.gb    { background: rgba(247,215,148,0.12); color: #F7D794; }
+  .enc-badge.koi   { background: rgba(0,217,163,0.1); color: var(--accent2); }
+
+  .card-desc {
+    font-size: 11px;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    margin-left: auto;
+  }
+
+  .copy-btn:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  .copy-btn.copied {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(0,217,163,0.08);
+  }
+
+  .card-body {
+    padding: 10px 14px 10px 18px;
+  }
+
+  .encoded-text {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    word-break: break-all;
+    line-height: 1.8;
+    opacity: 0.9;
+    white-space: pre-wrap;
+  }
+
+  /* ── FOOTER ──────────────────────────────────────── */
+  footer {
+    padding: 14px 32px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  .status-dot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  .status-dot::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 6px var(--accent2);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* ── RESPONSIVE ──────────────────────────────────── */
+  @media (max-width: 800px) {
+    .workspace { grid-template-columns: 1fr; }
+    .left-panel { border-right: none; border-bottom: 1px solid var(--border); }
+    .right-panel { padding: 20px 16px; }
+    header .subtitle { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- HEADER -->
+  <header>
+    <div class="logo-mark">✉</div>
+    <h1>Email Subject Encoder Pro</h1>
+    <span class="subtitle">RFC 2047 · MIME Encoding · v2.0</span>
+  </header>
+
+  <!-- WORKSPACE -->
+  <div class="workspace">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+      <div class="panel-header">Configuration</div>
+
+      <div class="input-area">
+        <!-- Input -->
+        <div>
+          <div class="input-label">Subject Line</div>
+          <textarea id="inputText" placeholder="Type your email subject line…" oninput="handleInput()" rows="4"></textarea>
+          <div class="char-count"><span id="charCount">0</span> chars</div>
+        </div>
+
+        <!-- Case variants -->
+        <div>
+          <div class="section-label">Case Variants</div>
+          <div class="case-toggles">
+            <button class="case-toggle active" data-case="original" onclick="toggleCase(this)">
+              <span class="dot"></span>Original
+            </button>
+            <button class="case-toggle active" data-case="upper" onclick="toggleCase(this)">
+              <span class="dot"></span>UPPER
+            </button>
+            <button class="case-toggle active" data-case="lower" onclick="toggleCase(this)">
+              <span class="dot"></span>lower
+            </button>
+            <button class="case-toggle active" data-case="sentence" onclick="toggleCase(this)">
+              <span class="dot"></span>Sentence
+            </button>
+          </div>
+        </div>
+
+        <!-- Encoding formats -->
+        <div>
+          <div class="section-label">Encoding Formats</div>
+          <div class="format-toggles">
+            <button class="format-toggle active" data-fmt="plain" onclick="toggleFmt(this)">
+              <span class="fdot"></span>Plain Text
+              <span class="badge">TEXT</span>
+            </button>
+            <button class="format-toggle active" data-fmt="b64" onclick="toggleFmt(this)">
+              <span class="fdot"></span>Base64 (UTF-8)
+              <span class="badge">B64</span>
+            </button>
+            <button class="format-toggle active" data-fmt="qp" onclick="toggleFmt(this)">
+              <span class="fdot"></span>Quoted-Printable (UTF-8)
+              <span class="badge">QP</span>
+            </button>
+            <button class="format-toggle active" data-fmt="iso" onclick="toggleFmt(this)">
+              <span class="fdot"></span>ISO-8859-1 Q-Encoding
+              <span class="badge">ISO</span>
+            </button>
+            <button class="format-toggle active" data-fmt="gb" onclick="toggleFmt(this)">
+              <span class="fdot"></span>GB2312 Q-Encoding
+              <span class="badge">GB</span>
+            </button>
+            <button class="format-toggle active" data-fmt="koi" onclick="toggleFmt(this)">
+              <span class="fdot"></span>KOI8-R Chunked
+              <span class="badge">KOI</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" onclick="copyAll()">Copy All Encoded Outputs</button>
+        <button class="btn-secondary" onclick="clearInput()">Clear</button>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel" id="output">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">⌨</div>
+        <h3>No subject yet</h3>
+        <p>Type a subject line on the left to generate all encoded formats instantly.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>Email Subject Encoder Pro · RFC 2047 compliant</span>
+    <span class="status-dot">Live encoding active</span>
+  </footer>
+</div>
+
+<script>
+// ── STATE ───────────────────────────────────────────
+const activeCases = new Set(['original','upper','lower','sentence']);
+const activeFmts  = new Set(['plain','b64','qp','iso','gb','koi']);
+
+// ── ENCODING HELPERS ────────────────────────────────
+function toQP(str) {
+  return str.replace(/[^a-zA-Z0-9\x20]/g, c => {
+    if (c === ' ') return '_';
+    return '=' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0');
+  }).replace(/ /g,'_');
+}
+
+function toB64(str) {
+  return '=?UTF-8?B?' + btoa(unescape(encodeURIComponent(str))) + '?=';
+}
+
+function toQPUtf8(str) {
+  return '=?UTF-8?Q?' + toQP(str) + '?=';
+}
+
+function toIso(str) {
+  return '=?ISO-8859-1?Q?' + toQP(str) + '?=';
+}
+
+function toGB(str) {
+  return '=?GB2312?Q?' + toQP(str) + '?=';
+}
+
+function toKOI(str) {
+  const hex = str.split('').map(c =>
+    '=' + c.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0')
+  ).join('');
+  const padding = '=20'.repeat(12);
+  const full = padding + hex + padding;
+  const chunks = full.match(/.{1,20}/g) || [];
+  return chunks.map(chunk => '=?KOI8-R?Q?' + chunk + '?=').join(' ');
+}
+
+function applyCase(text, caseType) {
+  switch(caseType) {
+    case 'upper':    return text.toUpperCase();
+    case 'lower':    return text.toLowerCase();
+    case 'sentence': return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    default:         return text;
+  }
+}
+
+// ── ENCODE CARD BUILDER ─────────────────────────────
+const FMT_META = {
+  plain: { label:'Plain Text',              badge:'plain', cls:'plain', desc:'Raw text, no encoding' },
+  b64:   { label:'Base64 (UTF-8)',          badge:'b64',   cls:'b64',   desc:'RFC 2047 · =?UTF-8?B?…?=' },
+  qp:    { label:'Quoted-Printable UTF-8',  badge:'qp',    cls:'qp',    desc:'RFC 2047 · =?UTF-8?Q?…?=' },
+  iso:   { label:'ISO-8859-1 Q-Encoding',  badge:'iso',   cls:'iso',   desc:'RFC 2047 · =?ISO-8859-1?Q?…?=' },
+  gb:    { label:'GB2312 Q-Encoding',       badge:'gb',    cls:'gb',    desc:'RFC 2047 · =?GB2312?Q?…?=' },
+  koi:   { label:'KOI8-R Chunked',          badge:'koi',   cls:'koi',   desc:'Chunked 20-char segments' },
+};
+
+const CASE_LABELS = {
+  original: 'Original',
+  upper:    'UPPER CASE',
+  lower:    'lower case',
+  sentence: 'Sentence case',
+};
+
+function encodeFor(text, fmt) {
+  switch(fmt) {
+    case 'plain': return text;
+    case 'b64':   return toB64(text);
+    case 'qp':    return toQPUtf8(text);
+    case 'iso':   return toIso(text);
+    case 'gb':    return toGB(text);
+    case 'koi':   return toKOI(text);
+  }
+}
+
+// ── RENDER ──────────────────────────────────────────
+function render() {
+  const input = document.getElementById('inputText').value;
+  const output = document.getElementById('output');
+  const empty  = document.getElementById('emptyState');
+
+  if (!input.trim()) {
+    output.innerHTML = '';
+    output.appendChild(empty || makeEmptyState());
+    return;
+  }
+
+  // Build HTML
+  let html = '';
+
+  for (const caseKey of ['original','upper','lower','sentence']) {
+    if (!activeCases.has(caseKey)) continue;
+
+    const caseText = applyCase(input, caseKey);
+    const label = CASE_LABELS[caseKey];
+
+    let cardsHtml = '';
+    for (const fmt of ['plain','b64','qp','iso','gb','koi']) {
+      if (!activeFmts.has(fmt)) continue;
+      const m = FMT_META[fmt];
+      const encoded = encodeFor(caseText, fmt);
+      cardsHtml += `
+        <div class="encode-card ${m.cls}">
+          <div class="card-top">
+            <span class="enc-badge ${m.badge}">${m.badge.toUpperCase()}</span>
+            <span class="card-desc">${m.desc}</span>
+            <button class="copy-btn" onclick="copyCard(this, \`${encoded.replace(/`/g,'\\`')}\`)">Copy</button>
+          </div>
+          <div class="card-body">
+            <div class="encoded-text">${escHtml(encoded)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (!cardsHtml) continue;
+
+    html += `
+      <div class="case-block">
+        <div class="case-block-header">
+          <span class="case-tag">${escHtml(label)}</span>
+          <span class="preview-text">${escHtml(caseText)}</span>
+        </div>
+        ${cardsHtml}
+      </div>
+    `;
+  }
+
+  output.innerHTML = html || '<div class="empty-state"><div class="empty-icon">◎</div><h3>No formats selected</h3><p>Enable at least one case variant and format on the left.</p></div>';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── INTERACTIONS ────────────────────────────────────
+function handleInput() {
+  const val = document.getElementById('inputText').value;
+  document.getElementById('charCount').textContent = val.length;
+  render();
+}
+
+function toggleCase(btn) {
+  const key = btn.dataset.case;
+  if (activeCases.has(key)) {
+    activeCases.delete(key);
+    btn.classList.remove('active');
+  } else {
+    activeCases.add(key);
+    btn.classList.add('active');
+  }
+  render();
+}
+
+function toggleFmt(btn) {
+  const key = btn.dataset.fmt;
+  if (activeFmts.has(key)) {
+    activeFmts.delete(key);
+    btn.classList.remove('active');
+  } else {
+    activeFmts.add(key);
+    btn.classList.add('active');
+  }
+  render();
+}
+
+function copyCard(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 1200);
+  });
+}
+
+function copyAll() {
+  const input = document.getElementById('inputText').value;
+  if (!input.trim()) return;
+
+  let all = '';
+  for (const caseKey of ['original','upper','lower','sentence']) {
+    if (!activeCases.has(caseKey)) continue;
+    const caseText = applyCase(input, caseKey);
+    all += `── ${CASE_LABELS[caseKey]} ──\n`;
+    for (const fmt of ['plain','b64','qp','iso','gb','koi']) {
+      if (!activeFmts.has(fmt)) continue;
+      all += `[${fmt.toUpperCase()}] ${encodeFor(caseText, fmt)}\n`;
+    }
+    all += '\n';
+  }
+
+  navigator.clipboard.writeText(all.trim()).then(() => {
+    const btn = document.querySelector('.btn-primary');
+    const orig = btn.textContent;
+    btn.textContent = '✓ All Copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+
+function clearInput() {
+  document.getElementById('inputText').value = '';
+  document.getElementById('charCount').textContent = '0';
+  render();
+}
+</script>
+</body>
+</html>
